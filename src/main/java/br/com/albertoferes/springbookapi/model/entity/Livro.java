@@ -1,5 +1,7 @@
 package br.com.albertoferes.springbookapi.model.entity;
 
+import br.com.albertoferes.springbookapi.api.resource.dto.LivroDTO;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -20,6 +22,17 @@ public class Livro {
         this.titulo = titulo;
         this.autor = autor;
         this.isbn = isbn;
+    }
+
+    private Livro(LivroDTO livroDTO) {
+        this.id = livroDTO.getId();
+        this.titulo = livroDTO.getTitulo();
+        this.autor = livroDTO.getAutor();
+        this.isbn = livroDTO.getIsbn();
+    }
+
+    public static Livro criar(LivroDTO livroDTO) {
+        return new Livro(livroDTO);
     }
 
     public Livro() {

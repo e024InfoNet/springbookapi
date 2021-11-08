@@ -1,13 +1,17 @@
 package br.com.albertoferes.springbookapi.api.resource;
 
+import br.com.albertoferes.springbookapi.api.resource.dto.LivroDTO;
 import br.com.albertoferes.springbookapi.model.entity.Livro;
 import br.com.albertoferes.springbookapi.service.LivroService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/livros")
@@ -17,8 +21,11 @@ public class LivroController {
     private LivroService service;
 
     @GetMapping
-    public ResponseEntity<List<Livro>> getAll() {
-        List<Livro> livros = service.buscarTodos();
+    public ResponseEntity<List<LivroDTO>> getAll() {
+        List<LivroDTO> livros = service.buscarTodos()
+                .stream()
+                .map(LivroDTO::criar)
+                .collect(Collectors.toList());
 
         if (Boolean.FALSE.equals(livros.isEmpty())) {
             return ResponseEntity.ok().body(livros);
@@ -27,10 +34,13 @@ public class LivroController {
     }
 
     @PostMapping
-    public ResponseEntity<Livro> save(@RequestBody Livro livro) {
+    public ResponseEntity<LivroDTO> save(@RequestBody Livro livro) {
         Livro livroSalvo = service.salvar(livro);
         if (Objects.nonNull(livroSalvo.getId())) {
-            return ResponseEntity.ok().body(livroSalvo);
+            URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
+                    .path("/{id}")
+                    .buildAndExpand(livroSalvo.getId()).toUri();
+            return ResponseEntity.created(uri).build();
         }
         return ResponseEntity.internalServerError().build();
     }
